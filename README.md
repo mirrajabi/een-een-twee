@@ -1,6 +1,8 @@
 # 112 Live - Netherlands
 
-This project scrapes data from <https://alarmeringen.nl> and shows the latest 112 reports on a map.
+This project scrapes data from <https://alarmeringen.nl> and shows the latest 112 reports on a map using Mapbox.
+
+![Screenshot](./assets/screenshot.png)
 
 **WARNING**: Do not use this project on a scale that puts a lot of load on the scraping target. This project is intended as a proof of concept, not as a tool to be used by many people at the same time.
 
