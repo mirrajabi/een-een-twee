@@ -10,6 +10,7 @@ import iconPolice from "../../res/police-badge.png";
 import { StaticImageData } from "next/image";
 
 const CENTER: [number, number] = process.env.NEXT_PUBLIC_CENTER!.split(",").map((x) => parseFloat(x)) as [number, number];
+const REGION_URL = process.env.NEXT_PUBLIC_REGION_URL!;
 
 export default function Home() {
   const [map, setMap] = useState<mapboxgl.Map>();
@@ -29,14 +30,13 @@ export default function Home() {
 
   const query = useQuery({
     queryKey: ["reports"],
-    queryFn: getAllReportsWithDetails,
+    queryFn: async () => await getAllReportsWithDetails(REGION_URL),
     refetchInterval: 20000,
     staleTime: 10000,
   });
 
   useEffect(() => {
     if (!map || !query.data) {
-      console.log(query.data);
       return;
     }
 
@@ -108,8 +108,6 @@ const setupMap = (map: mapboxgl.Map) => {
 };
 
 const updateMap = (map: mapboxgl.Map, reports: ReportDetails[]) => {
-  console.log("updateMap");
-  console.log(reports);
   const source = map.getSource("reports") as mapboxgl.GeoJSONSource;
   if (source === undefined) {
     return;

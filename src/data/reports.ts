@@ -25,17 +25,21 @@ export interface ReportDetails {
   type: ReportType;
 }
 
-export const getAllReportsWithDetails = async (): Promise<ReportDetails[]> => {
-  const reports = await getReports();
+export const getAllReportsWithDetails = async (
+  regionUrl: string
+): Promise<ReportDetails[]> => {
+  const reports = await getReports(regionUrl);
   const reportDetails = await Promise.all(
     reports.map(async (report) => await getReport(report.url))
   );
   return reportDetails;
 };
 
-export const getReports = async (): Promise<ReportListItem[]> => {
+export const getReports = async (
+  regionUrl: string
+): Promise<ReportListItem[]> => {
   const response = await axios.get(
-    "http://localhost:3000/api/alarmeringen-proxy?proxyUrl=https://alarmeringen.nl/noord-holland/amsterdam-amstelland/"
+    `http://localhost:3000/api/alarmeringen-proxy?proxyUrl=${regionUrl}`
   );
 
   return await parseReports(response.data);
@@ -112,16 +116,24 @@ const parseReportDetails = async (html: string): Promise<ReportDetails> => {
   const title = $("h1").text().replace("\n", "").trim()!;
 
   const mapUrl = $("#heatmap").children($("iframe")).attr("data-privacy-src")!;
-  const parsedMapUrl = new URL(mapUrl);
-  const parsedLocation = parsedMapUrl.searchParams!.get("q")!.split(",");
+
   let location: [number, number];
-  if (
-    Number.isNaN(Number(parsedLocation[0])) ||
-    Number.isNaN(Number(parsedLocation[1]))
-  ) {
+  try {
+    const parsedMapUrl = new URL(mapUrl);
+    const parsedLocation = parsedMapUrl.searchParams!.get("q")!.split(",");
+    if (
+      Number.isNaN(Number(parsedLocation[0])) ||
+      Number.isNaN(Number(parsedLocation[1]))
+    ) {
+      location = [0, 0];
+    } else {
+      location = parsedLocation.map((c) => Number(c.trim())) as [
+        number,
+        number
+      ];
+    }
+  } catch (e) {
     location = [0, 0];
-  } else {
-    location = parsedLocation.map((c) => Number(c.trim())) as [number, number];
   }
 
   const dateEl = $(".info-row").find($(".date")).toArray()[1];
