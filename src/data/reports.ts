@@ -113,7 +113,7 @@ const parseReportDetails = async (html: string): Promise<ReportDetails> => {
   const pageUrlSplit = pageUrl!.split("/");
   const id = pageUrlSplit[pageUrlSplit.length - 2];
 
-  const title = $("h1").text().replace("\n", "").trim()!;
+  const title = $("h1").text().trim()!;
 
   const mapUrl = $("#heatmap").children($("iframe")).attr("data-privacy-src")!;
 
@@ -149,11 +149,26 @@ const parseReportDetails = async (html: string): Promise<ReportDetails> => {
     .toLowerCase();
   const type = TYPES_NL_TO_EN[typeNL];
 
+  // The description section consists of an optional <h4> element followed by many <p> elements.
+  // the sequence of <p> elements ends with an empty <p> element like so: <p></p>
+  const descriptionDiv = $(".info-row").next().first();
+  const h4 = descriptionDiv.find($("h4")).first();
+  const p = descriptionDiv.find($("p")).toArray();
+  let description = "";
+  if (h4.length > 0) {
+    description += '<h4>' + h4.text().trim()! + '</h4>';
+  }
+  for (let i = 0; i < p.length; i++) {
+    if (p[i].children.length > 0) {
+      description += '<p>' + $(p[i]).text().trim()! + "</p>";
+    }
+  }
+
   return {
     id: id,
     title: title,
     date: date,
-    description: "",
+    description: description,
     location: location,
     type: type,
   };

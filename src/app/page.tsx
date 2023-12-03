@@ -9,7 +9,9 @@ import iconAmbulance from "../../res/medical-emergency.png";
 import iconPolice from "../../res/police-badge.png";
 import { StaticImageData } from "next/image";
 
-const CENTER: [number, number] = process.env.NEXT_PUBLIC_CENTER!.split(",").map((x) => parseFloat(x)) as [number, number];
+const CENTER: [number, number] = process.env
+  .NEXT_PUBLIC_CENTER!.split(",")
+  .map((x) => parseFloat(x)) as [number, number];
 const REGION_URL = process.env.NEXT_PUBLIC_REGION_URL!;
 
 export default function Home() {
@@ -105,6 +107,32 @@ const setupMap = (map: mapboxgl.Map) => {
       ],
     },
   });
+
+  // When a click event occurs on a feature in the places layer, open a popup at the
+  // location of the feature, with description HTML from its properties.
+  map.on("click", "reports", (e) => {
+    // Copy coordinates array.
+    const coordinates = (e.features![0].geometry as any).coordinates.slice();
+    const description = e.features![0].properties!.description;
+
+    // Ensure that if the map is zoomed out such that multiple
+    // copies of the feature are visible, the popup appears
+    // over the copy being pointed to.
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+
+    new mapboxgl.Popup().setLngLat(coordinates).setHTML(description).addTo(map);
+  });
+  // Change the cursor to a pointer when the mouse is over the places layer.
+  map.on("mouseenter", "reports", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+
+  // Change it back to a pointer when it leaves.
+  map.on("mouseleave", "reports", () => {
+    map.getCanvas().style.cursor = "";
+  });
 };
 
 const updateMap = (map: mapboxgl.Map, reports: ReportDetails[]) => {
@@ -123,6 +151,7 @@ const updateMap = (map: mapboxgl.Map, reports: ReportDetails[]) => {
       },
       properties: {
         type: report.type,
+        description: `<strong>${report.title}</strong>${report.description}`,
       },
     })),
   });
