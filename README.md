@@ -4,9 +4,9 @@ This project scrapes data from <https://alarmeringen.nl> and shows the latest 11
 
 ![Screenshot](./assets/screenshot.png)
 
-**WARNING**: Do not use this project on a scale that puts a lot of load on the scraping target. This project is intended as a proof of concept, not as a tool to be used by many people at the same time.
+**WARNING**: Do not use this project on a scale that puts a lot of load on the scraping target. This project is intended as a proof of concept, not as a tool to be used at scale.
 
-**WARNING**: This project is not affiliated with <https://alarmeringen.nl> in any way. Use at your own risk.
+**WARNING**: This project is not affiliated with <https://alarmeringen.nl> in any way.
 
 ## Installation
 
